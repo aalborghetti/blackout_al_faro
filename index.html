@@ -4,133 +4,11 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Blackout al Faro — Assegnazione Ruoli</title>
-  <style>
-    :root { --bg:#0b0f14; --card:#121826; --text:#e6edf3; --muted:#9aa7b2; --accent:#4aa3ff; --danger:#ff4a4a; }
-    *{ box-sizing:border-box; }
-    body{
-      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      background:radial-gradient(900px 600px at 20% 10%, #152238 0%, var(--bg) 60%);
-      color:var(--text);
-      min-height:100vh; display:flex; align-items:center; justify-content:center;
-      padding:16px;
-    }
-    .app{ width:min(520px, 100%); }
-    .card{
-      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
-      border:1px solid rgba(255,255,255,.08);
-      border-radius:18px;
-      padding:18px;
-      box-shadow:0 10px 30px rgba(0,0,0,.35);
-    }
-    h1{ font-size:18px; margin:0 0 12px; letter-spacing:.2px; }
-    h2{ font-size:16px; margin:0 0 10px; color:var(--muted); font-weight:600; }
-    p{ margin:10px 0; color:var(--muted); line-height:1.35; }
-    .row{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
-    label{ font-size:14px; color:var(--muted); }
-    select, button{
-      font:inherit;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.25);
-      color:var(--text);
-      padding:10px 12px;
-    }
-    select{ min-width:120px; }
-    button{
-      cursor:pointer;
-      transition:transform .04s ease, background .2s ease, border-color .2s ease;
-      user-select:none;
-    }
-    button:hover{ border-color:rgba(255,255,255,.22); }
-    button:active{ transform:translateY(1px); }
-    button.primary{ background:rgba(74,163,255,.18); border-color:rgba(74,163,255,.35); }
-    button.primary:hover{ background:rgba(74,163,255,.24); }
-    button.ghost{ background:transparent; }
-    button:disabled{
-      opacity:.45; cursor:not-allowed; transform:none;
-    }
-    .toggle{
-      display:flex; align-items:center; gap:10px;
-      padding:10px 12px;
-      border-radius:12px;
-      border:1px solid rgba(255,255,255,.12);
-      background:rgba(0,0,0,.2);
-    }
-    .toggle input{ transform:scale(1.2); }
-    .divider{ height:1px; background:rgba(255,255,255,.08); margin:14px 0; }
-
-    .cover{
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.14);
-      background:linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
-      height:210px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding:18px;
-      cursor:pointer;
-      position:relative;
-      overflow:hidden;
-    }
-    .cover::before{
-      content:"";
-      position:absolute; inset:-40px;
-      background:radial-gradient(180px 180px at 30% 30%, rgba(74,163,255,.18), transparent 70%);
-      transform:rotate(8deg);
-    }
-    .cover > div{ position:relative; }
-    .big{
-      font-size:22px;
-      font-weight:800;
-      letter-spacing:.4px;
-    }
-    .hint{ margin-top:8px; font-size:14px; color:var(--muted); }
-    .roleName{
-      font-size:22px;
-      font-weight:900;
-      margin:0;
-    }
-    .badge{
-      display:inline-block;
-      margin-top:10px;
-      padding:6px 10px;
-      border-radius:999px;
-      font-size:12px;
-      border:1px solid rgba(255,255,255,.14);
-      color:var(--muted);
-      background:rgba(0,0,0,.18);
-    }
-    .roleBox{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      align-items:center;
-      justify-content:center;
-      height:210px;
-      border-radius:16px;
-      border:1px solid rgba(255,255,255,.14);
-      background:linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.25));
-      padding:18px;
-      text-align:center;
-    }
-    .roleDesc{ margin:0; color:var(--muted); font-size:14px; line-height:1.35; }
-    .footerRow{ display:flex; justify-content:space-between; gap:10px; margin-top:14px; }
-    .small{ font-size:12px; color:var(--muted); }
-    .flash{
-      position:fixed; inset:0;
-      background:#000;
-      opacity:0;
-      pointer-events:none;
-      transition:opacity .14s ease;
-    }
-    .flash.on{ opacity:.92; }
-    .mono{ font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace; }
-    ul{ margin:8px 0 0 18px; color:var(--muted); }
-  </style>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="app">
+    <!-- SETUP -->
     <div class="card" id="screen-setup">
       <h1>Blackout al Faro — Assegnazione ruoli</h1>
       <p>Seleziona il numero di giocatori, genera i ruoli e passa il dispositivo: ognuno vede solo il proprio ruolo.</p>
@@ -160,6 +38,7 @@
       </div>
     </div>
 
+    <!-- ASSEGNAZIONE -->
     <div class="card" id="screen-assign" style="display:none;">
       <h1 id="assign-title">Giocatore 1</h1>
       <div id="assign-area"></div>
@@ -174,304 +53,76 @@
       </p>
     </div>
 
+    <!-- FINE -->
     <div class="card" id="screen-done" style="display:none;">
       <h1>Ruoli assegnati</h1>
       <p>Ora potete iniziare la partita (a voce) usando i ruoli assegnati.</p>
 
       <div class="divider"></div>
 
+      <div class="row">
+        <button class="primary" id="btn-start-game">Avvia narratore</button>
+        <button class="primary" id="btn-new">Nuova assegnazione</button>
+        <button class="ghost" id="btn-back">Torna al setup</button>
+      </div>
+
+      <div class="divider"></div>
+
       <h2>Riepilogo (solo per l’host)</h2>
       <p class="small">Se non vuoi che nessuno veda il riepilogo, non aprire questa sezione in pubblico.</p>
       <div id="summary" class="small mono" style="white-space:pre-wrap;"></div>
+    </div>
+
+    <!-- NARRATORE -->
+    <div class="card" id="screen-game" style="display:none;">
+      <h1>Narratore</h1>
+      <p class="small">Usa i pulsanti per scandire le fasi. L’audio parte dopo “Abilita audio”.</p>
+
+      <div class="row" style="margin-top:8px;">
+        <button class="primary" id="btn-audio-enable">🔊 Abilita audio</button>
+
+        <label class="toggle inline">
+          <input type="checkbox" id="tts-enabled" checked />
+          <span>Voce (TTS)</span>
+        </label>
+
+        <label class="toggle inline">
+          <input type="checkbox" id="sfx-enabled" />
+          <span>Effetti (SFX)</span>
+        </label>
+      </div>
+
+      <div class="divider"></div>
+
+      <h2>Fase attuale</h2>
+      <div class="cover noClick" id="phase-box" style="height:auto;">
+        <div>
+          <div class="big" id="phase-title">—</div>
+          <div class="hint" id="phase-sub">Premi “Inizia”</div>
+        </div>
+      </div>
 
       <div class="divider"></div>
 
       <div class="row">
-        <button class="primary" id="btn-new">Nuova assegnazione</button>
-        <button class="ghost" id="btn-back">Torna al setup</button>
+        <button class="primary" id="btn-phase-start">Inizia</button>
+        <button id="btn-phase-next">Fase successiva</button>
+        <button class="ghost" id="btn-phase-repeat">Ripeti audio</button>
       </div>
+
+      <div class="divider"></div>
+
+      <button class="ghost" id="btn-exit-game">Esci (torna al riepilogo)</button>
+
+      <!-- SFX opzionali: metti i file in ./sfx/ -->
+      <audio id="sfx-night" preload="auto" src="sfx/night.mp3"></audio>
+      <audio id="sfx-day" preload="auto" src="sfx/day.mp3"></audio>
+      <audio id="sfx-vote" preload="auto" src="sfx/vote.mp3"></audio>
     </div>
   </div>
 
   <div class="flash" id="flash"></div>
 
-  <script>
-    // -----------------------------
-    // Config ruoli (nomi + descrizioni)
-    // -----------------------------
-    const ROLE_INFO = {
-      "Sabotatore": {
-        desc: "Sei un Sabotatore. Di notte scegliete insieme un bersaglio.",
-        badge: "Team notte"
-      },
-      "Custode": {
-        desc: "Sei un Custode. Di giorno discuti e vota chi sospetti.",
-        badge: "Team giorno"
-      },
-      "Sentinella": {
-        desc: "Ogni notte puoi controllare l’allineamento di 1 persona.",
-        badge: "Speciale"
-      },
-      "Tecnico": {
-        desc: "1 volta a partita puoi bloccare la notte: nessuna eliminazione.",
-        badge: "Speciale"
-      },
-      "Portavoce": {
-        desc: "Se vieni eliminato, lasci un ultimo messaggio (max 10 parole).",
-        badge: "Speciale"
-      },
-      "Disturbatore": {
-        desc: "Neutrale: vinci se sopravvivi fino alla fine o se vieni votato entro il Giorno 2.",
-        badge: "Neutrale"
-      }
-    };
-
-    // -----------------------------
-    // Helpers
-    // -----------------------------
-    function fisherYatesShuffle(arr) {
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      return arr;
-    }
-
-    function sabotageCount(n) {
-      return (n <= 10) ? 2 : 3;
-    }
-
-    function specialsFor(n, chaosEnabled) {
-      const s = [];
-      if (n >= 5) s.push("Sentinella");
-      if (n >= 7) s.push("Tecnico");
-      if (n >= 9) s.push("Portavoce");
-      if (chaosEnabled && n >= 13) s.push("Disturbatore");
-      return s;
-    }
-
-    function buildRoles(n, chaosEnabled) {
-      const roles = [];
-
-      // Sabotatori
-      const sab = sabotageCount(n);
-      for (let i = 0; i < sab; i++) roles.push("Sabotatore");
-
-      // Speciali
-      const speciali = specialsFor(n, chaosEnabled);
-      roles.push(...speciali);
-
-      // Riempi con Custodi
-      while (roles.length < n) roles.push("Custode");
-
-      // Shuffle
-      fisherYatesShuffle(roles);
-      return roles;
-    }
-
-    function compositionText(n, chaosEnabled) {
-      const sab = sabotageCount(n);
-      const speciali = specialsFor(n, chaosEnabled);
-      const custodi = n - sab - speciali.length;
-      return `Giocatori: ${n}
-- Sabotatori: ${sab}
-- Custodi: ${custodi}
-- Speciali: ${speciali.length ? speciali.join(", ") : "nessuno"}`;
-    }
-
-    function flashScreen() {
-      const el = document.getElementById("flash");
-      el.classList.add("on");
-      setTimeout(() => el.classList.remove("on"), 140);
-    }
-
-    // -----------------------------
-    // State
-    // -----------------------------
-    let state = {
-      n: 5,
-      chaos: false,
-      roles: [],
-      current: 0,
-      revealed: false
-    };
-
-    // -----------------------------
-    // DOM refs
-    // -----------------------------
-    const screenSetup = document.getElementById("screen-setup");
-    const screenAssign = document.getElementById("screen-assign");
-    const screenDone  = document.getElementById("screen-done");
-
-    const selPlayers = document.getElementById("players");
-    const chkChaos = document.getElementById("chaos");
-
-    const btnGenerate = document.getElementById("btn-generate");
-    const btnAbout = document.getElementById("btn-about");
-
-    const previewBox = document.getElementById("preview");
-    const previewText = document.getElementById("preview-text");
-
-    const assignTitle = document.getElementById("assign-title");
-    const assignArea = document.getElementById("assign-area");
-    const btnNext = document.getElementById("btn-next");
-    const btnRestart = document.getElementById("btn-restart");
-
-    const summary = document.getElementById("summary");
-    const btnNew = document.getElementById("btn-new");
-    const btnBack = document.getElementById("btn-back");
-
-    // -----------------------------
-    // Init select
-    // -----------------------------
-    for (let i = 5; i <= 15; i++) {
-      const opt = document.createElement("option");
-      opt.value = String(i);
-      opt.textContent = String(i);
-      selPlayers.appendChild(opt);
-    }
-    selPlayers.value = "5";
-
-    // -----------------------------
-    // Screen utils
-    // -----------------------------
-    function showScreen(which) {
-      screenSetup.style.display = (which === "setup") ? "" : "none";
-      screenAssign.style.display = (which === "assign") ? "" : "none";
-      screenDone.style.display  = (which === "done")  ? "" : "none";
-    }
-
-    function renderAssign() {
-      const i = state.current;
-      assignTitle.textContent = `Giocatore ${i + 1}`;
-      btnNext.disabled = !state.revealed;
-
-      // Pulizia
-      assignArea.innerHTML = "";
-
-      if (!state.revealed) {
-        const cover = document.createElement("div");
-        cover.className = "cover";
-        cover.setAttribute("role", "button");
-        cover.setAttribute("aria-label", "Tocca per vedere il tuo ruolo");
-        cover.innerHTML = `
-          <div>
-            <div class="big">Tocca per vedere il tuo ruolo</div>
-            <div class="hint">Assicurati che nessuno stia guardando 👀</div>
-          </div>
-        `;
-        cover.addEventListener("click", () => {
-          state.revealed = true;
-          renderAssign();
-        });
-        assignArea.appendChild(cover);
-      } else {
-        const role = state.roles[i];
-        const info = ROLE_INFO[role] || { desc: "", badge: "" };
-
-        const box = document.createElement("div");
-        box.className = "roleBox";
-        box.innerHTML = `
-          <div>
-            <p class="roleName">${role}</p>
-            <div class="badge">${info.badge}</div>
-          </div>
-          <p class="roleDesc">${info.desc}</p>
-          <p class="small">Quando hai finito, passa il dispositivo.</p>
-        `;
-        assignArea.appendChild(box);
-      }
-    }
-
-    function startAssignment() {
-      state.n = parseInt(selPlayers.value, 10);
-      state.chaos = chkChaos.checked;
-
-      state.roles = buildRoles(state.n, state.chaos);
-      state.current = 0;
-      state.revealed = false;
-
-      renderAssign();
-      showScreen("assign");
-    }
-
-    function goNextPlayer() {
-      if (!state.revealed) return;
-
-      flashScreen(); // riduce rischio "frame" visibile
-      state.revealed = false;
-      state.current++;
-
-      if (state.current >= state.n) {
-        // Done screen
-        const lines = state.roles.map((r, idx) => `Giocatore ${idx + 1}: ${r}`);
-        summary.textContent = lines.join("\n");
-        showScreen("done");
-      } else {
-        renderAssign();
-      }
-    }
-
-    // -----------------------------
-    // Events
-    // -----------------------------
-    btnGenerate.addEventListener("click", startAssignment);
-
-    btnAbout.addEventListener("click", () => {
-      const n = parseInt(selPlayers.value, 10);
-      const chaosEnabled = chkChaos.checked;
-      previewText.textContent = compositionText(n, chaosEnabled);
-      previewBox.style.display = (previewBox.style.display === "none") ? "" : "none";
-    });
-
-    selPlayers.addEventListener("change", () => {
-      if (previewBox.style.display !== "none") {
-        previewText.textContent = compositionText(parseInt(selPlayers.value, 10), chkChaos.checked);
-      }
-    });
-
-    chkChaos.addEventListener("change", () => {
-      if (previewBox.style.display !== "none") {
-        previewText.textContent = compositionText(parseInt(selPlayers.value, 10), chkChaos.checked);
-      }
-    });
-
-    btnNext.addEventListener("click", goNextPlayer);
-
-    btnRestart.addEventListener("click", () => {
-      // Reset solo della fase assegnazione (stessi ruoli)
-      state.current = 0;
-      state.revealed = false;
-      renderAssign();
-    });
-
-    btnNew.addEventListener("click", () => {
-      // Nuova assegnazione con stessi parametri attuali
-      selPlayers.value = String(state.n);
-      chkChaos.checked = state.chaos;
-      startAssignment();
-    });
-
-    btnBack.addEventListener("click", () => {
-      showScreen("setup");
-    });
-
-    // Tasto spazio/enter per UX (opzionale)
-    document.addEventListener("keydown", (e) => {
-      if (screenAssign.style.display !== "none") {
-        if (!state.revealed && (e.key === " " || e.key === "Enter")) {
-          e.preventDefault();
-          state.revealed = true;
-          renderAssign();
-        } else if (state.revealed && (e.key === "Enter")) {
-          e.preventDefault();
-          goNextPlayer();
-        }
-      }
-    });
-
-    // Start
-    showScreen("setup");
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
