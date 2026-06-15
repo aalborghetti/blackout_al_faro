@@ -11,11 +11,13 @@
     <!-- SETUP -->
     <div class="card" id="screen-setup">
       <h1>Blackout al Faro — Assegnazione ruoli</h1>
-      <p>Seleziona il numero di giocatori, genera i ruoli e passa il dispositivo: ognuno vede solo il proprio ruolo.</p>
+      <p class="lead">Seleziona il numero di giocatori, genera i ruoli e passa il dispositivo: ognuno vede solo il proprio ruolo.</p>
 
-      <div class="row">
-        <div>
-          <label for="players">Giocatori (5–15)</label><br>
+      <div class="divider"></div>
+
+      <div class="row setup-top">
+        <div class="field">
+          <label for="players">Giocatori (5–15)</label>
           <select id="players"></select>
         </div>
 
@@ -60,10 +62,12 @@
 
       <div class="divider"></div>
 
-      <div class="row">
-        <button class="primary" id="btn-start-game">Avvia narratore</button>
-        <button class="primary" id="btn-new">Nuova assegnazione</button>
-        <button class="ghost" id="btn-back">Torna al setup</button>
+      <div class="actions">
+        <button class="primary block" id="btn-start-game">▶ Avvia narratore</button>
+        <div class="row">
+          <button class="secondary" id="btn-new">Nuova assegnazione</button>
+          <button class="ghost" id="btn-back">Torna al setup</button>
+        </div>
       </div>
 
       <div class="divider"></div>
@@ -89,6 +93,11 @@
         <label class="toggle inline">
           <input type="checkbox" id="sfx-enabled" />
           <span>Effetti (SFX)</span>
+        </label>
+
+        <label class="toggle inline" title="Sottofondo di temporale generato dal vivo: più intenso di notte, più calmo di giorno.">
+          <input type="checkbox" id="storm-enabled" checked />
+          <span>🌩️ Temporale</span>
         </label>
       </div>
 

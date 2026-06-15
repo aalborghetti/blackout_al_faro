@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Sabotatore">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="34%" r="78%">
+      <stop offset="0%" stop-color="#2a1620"/>
+      <stop offset="100%" stop-color="#0b0f14"/>
+    </radialGradient>
+    <radialGradient id="gl" cx="50%" cy="40%" r="58%">
+      <stop offset="0%" stop-color="#ff5c6c" stop-opacity=".42"/>
+      <stop offset="100%" stop-color="#ff5c6c" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <circle cx="100" cy="100" r="94" fill="url(#bg)"/>
+  <circle cx="100" cy="100" r="94" fill="url(#gl)"/>
+  <circle cx="100" cy="100" r="94" fill="none" stroke="#ff5c6c" stroke-opacity=".55" stroke-width="2.5"/>
+
+  <!-- faro spento -->
+  <g stroke-linejoin="round">
+    <ellipse cx="100" cy="181" rx="30" ry="6" fill="#0e1420"/>
+    <polygon points="93,179 107,179 104,146 96,146" fill="#2a3242"/>
+    <rect x="95.5" y="160" width="9" height="5" fill="#3a4456"/>
+    <rect x="93.5" y="142" width="13" height="4" fill="#3a4456"/>
+    <rect x="95.5" y="133" width="9" height="10" fill="#222a38"/>
+    <polygon points="93.5,133 106.5,133 100,125" fill="#2a3242"/>
+    <circle cx="100" cy="138" r="2.6" fill="#161b24"/>
+  </g>
+
+  <!-- figura incappucciata -->
+  <g stroke-linejoin="round">
+    <path d="M100,55 C114,55 123,69 124,84 L132,151 L68,151 L76,84 C77,69 86,55 100,55 Z"
+          fill="#161b24" stroke="#ff5c6c" stroke-opacity=".40" stroke-width="1.6"/>
+    <path d="M100,65 C110,65 117,75 118,87 C108,95 92,95 82,87 C83,75 90,65 100,65 Z" fill="#0b0f14"/>
+  </g>
+
+  <!-- scintilla del sabotaggio -->
+  <path d="M70,128 l3,-8 3,8 8,3 -8,3 -3,8 -3,-8 -8,-3 z" fill="#ffd24a" opacity=".9"/>
+</svg>

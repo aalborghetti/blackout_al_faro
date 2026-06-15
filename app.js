@@ -101,6 +101,8 @@ const btnStartGame = document.getElementById("btn-start-game");
 const btnAudioEnable = document.getElementById("btn-audio-enable");
 const chkTtsEnabled = document.getElementById("tts-enabled");
 const chkSfxEnabled = document.getElementById("sfx-enabled");
+const chkStormEnabled = document.getElementById("storm-enabled");
+const phaseBox = document.getElementById("phase-box");
 const phaseTitle = document.getElementById("phase-title");
 const phaseSub = document.getElementById("phase-sub");
 const btnPhaseStart = document.getElementById("btn-phase-start");
@@ -162,9 +164,14 @@ function renderAssign() {
     const role = state.roles[i];
     const info = ROLE_INFO[role] || { desc: "", badge: "" };
 
+    const slug = role.toLowerCase();
+
     const box = document.createElement("div");
     box.className = "roleBox";
+    box.dataset.role = slug;
     box.innerHTML = `
+      <img class="roleArt" src="img/${slug}.svg" alt="${role}"
+           onerror="this.style.display='none'" />
       <div>
         <p class="roleName">${role}</p>
         <div class="badge">${info.badge}</div>
@@ -286,6 +293,11 @@ function speak(text) {
   u.pitch = 1.0;
   u.volume = 1.0;
 
+  // Abbassa il temporale durante la narrazione, poi lo ripristina.
+  u.onstart = () => stormDuck(true);
+  u.onend = () => stormDuck(false);
+  u.onerror = () => stormDuck(false);
+
   gameState.lastSpoken = text;
   window.speechSynthesis.speak(u);
 }
@@ -294,17 +306,20 @@ function renderPhase() {
   if (gameState.phaseIndex < 0) {
     phaseTitle.textContent = "—";
     phaseSub.textContent = "Premi “Inizia”.";
+    phaseBox.dataset.phase = "";
     return;
   }
   const p = PHASES[gameState.phaseIndex];
   phaseTitle.textContent = p.title;
   phaseSub.textContent = p.sub;
+  phaseBox.dataset.phase = p.key;
 }
 
 function goToNextPhase() {
   gameState.phaseIndex = (gameState.phaseIndex + 1) % PHASES.length;
   const p = PHASES[gameState.phaseIndex];
   renderPhase();
+  updateStormForPhase(p);
   playSfx(p.sfx);
   speak(p.speak);
 }
@@ -314,6 +329,203 @@ function repeatPhaseAudio() {
   const p = PHASES[gameState.phaseIndex];
   playSfx(p.sfx);
   speak(p.speak);
+}
+
+// -----------------------------
+// Sottofondo temporale (Web Audio, procedurale)
+// Letto continuo di pioggia/vento/mare + tuoni casuali.
+// Cambia "umore" tra notte (intenso) e giorno (calmo).
+// -----------------------------
+const STORM_FULL = 0.9; // livello del master a regime
+
+// Preset per fase: pioggia, vento, cadenza e intensità dei tuoni.
+const STORM_MOODS = {
+  night: { rain: 0.55, rainHP: 800,  rainLP: 7800, wind: 0.34, windLP: 360, thMin: 5,  thMax: 14, thGain: 0.95, thLP: 360 },
+  day:   { rain: 0.24, rainHP: 1500, rainLP: 6400, wind: 0.16, windLP: 300, thMin: 14, thMax: 30, thGain: 0.45, thLP: 820 }
+};
+
+// Mappa la fase di gioco sull'umore del temporale.
+function phaseMood(key) {
+  return (key === "night") ? "night" : "day"; // il voto avviene di giorno
+}
+
+let storm = null;
+
+function makeNoise(ctx, seconds, type) {
+  const len = Math.floor(ctx.sampleRate * seconds);
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const d = buf.getChannelData(0);
+  if (type === "brown") {
+    let last = 0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random() * 2 - 1;
+      last = (last + 0.02 * w) / 1.02;
+      d[i] = last * 3.5;
+    }
+  } else {
+    for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  }
+  return buf;
+}
+
+function buildStorm() {
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  if (!Ctx) return null;
+  const ctx = new Ctx();
+
+  // master -> compressore (evita il clipping coi tuoni) -> uscita
+  const master = ctx.createGain();
+  master.gain.value = 0.0001;
+  const comp = ctx.createDynamicsCompressor();
+  master.connect(comp);
+  comp.connect(ctx.destination);
+
+  // Pioggia: rumore bianco filtrato.
+  const rainSrc = ctx.createBufferSource();
+  rainSrc.buffer = makeNoise(ctx, 2, "white");
+  rainSrc.loop = true;
+  const rainHP = ctx.createBiquadFilter(); rainHP.type = "highpass"; rainHP.frequency.value = 1000;
+  const rainLP = ctx.createBiquadFilter(); rainLP.type = "lowpass";  rainLP.frequency.value = 7000;
+  const rainGain = ctx.createGain(); rainGain.gain.value = 0.3;
+  rainSrc.connect(rainHP); rainHP.connect(rainLP); rainLP.connect(rainGain); rainGain.connect(master);
+
+  // Vento/mare/rombo: rumore bruno passa-basso.
+  const windSrc = ctx.createBufferSource();
+  windSrc.buffer = makeNoise(ctx, 4, "brown");
+  windSrc.loop = true;
+  const windLP = ctx.createBiquadFilter(); windLP.type = "lowpass"; windLP.frequency.value = 340;
+  const windGain = ctx.createGain(); windGain.gain.value = 0.2;
+  windSrc.connect(windLP); windLP.connect(windGain); windGain.connect(master);
+
+  // Raffiche: LFO lento che modula il guadagno del vento.
+  const gust = ctx.createOscillator(); gust.type = "sine"; gust.frequency.value = 0.08;
+  const gustDepth = ctx.createGain(); gustDepth.gain.value = 0.08;
+  gust.connect(gustDepth); gustDepth.connect(windGain.gain);
+
+  rainSrc.start(); windSrc.start(); gust.start();
+
+  return {
+    ctx, master,
+    rainHP, rainLP, rainGain,
+    windLP, windGain,
+    mood: "night", running: false, thunderTimer: null
+  };
+}
+
+function stormActive() {
+  return !!chkStormEnabled && chkStormEnabled.checked;
+}
+
+// Un singolo tuono: raffica di rumore passa-basso con coda di rombo.
+function stormThunder(gainPeak, lp) {
+  if (!storm) return;
+  const ctx = storm.ctx;
+  const now = ctx.currentTime;
+  const dur = 1.6 + Math.random() * 1.9;
+
+  const src = ctx.createBufferSource();
+  src.buffer = makeNoise(ctx, Math.ceil(dur) + 1, "white");
+
+  const lpf = ctx.createBiquadFilter();
+  lpf.type = "lowpass";
+  lpf.frequency.setValueAtTime(lp * 1.8, now);
+  lpf.frequency.exponentialRampToValueAtTime(Math.max(70, lp * 0.4), now + dur);
+
+  const g = ctx.createGain();
+  g.gain.setValueAtTime(0.0001, now);
+  g.gain.exponentialRampToValueAtTime(gainPeak, now + 0.05); // schiocco
+  g.gain.exponentialRampToValueAtTime(0.0001, now + dur);    // rombo che svanisce
+
+  src.connect(lpf); lpf.connect(g); g.connect(storm.master);
+  src.start(now);
+  src.stop(now + dur + 0.1);
+}
+
+function stormSchedule() {
+  if (!storm || !storm.running) return;
+  const m = STORM_MOODS[storm.mood] || STORM_MOODS.night;
+  const wait = (m.thMin + Math.random() * (m.thMax - m.thMin)) * 1000;
+  storm.thunderTimer = setTimeout(() => {
+    if (storm && storm.running && stormActive()) {
+      stormThunder(m.thGain * (0.7 + Math.random() * 0.5), m.thLP);
+    }
+    stormSchedule();
+  }, wait);
+}
+
+function applyStormMood(mood, ramp) {
+  if (!storm) return;
+  storm.mood = mood;
+  const m = STORM_MOODS[mood] || STORM_MOODS.night;
+  const ctx = storm.ctx;
+  const now = ctx.currentTime;
+  const r = (typeof ramp === "number") ? ramp : 2.5;
+  const set = (param, val) => {
+    param.cancelScheduledValues(now);
+    param.setValueAtTime(param.value, now);
+    param.linearRampToValueAtTime(val, now + r);
+  };
+  set(storm.rainGain.gain, m.rain);
+  set(storm.rainHP.frequency, m.rainHP);
+  set(storm.rainLP.frequency, m.rainLP);
+  set(storm.windGain.gain, m.wind);
+  set(storm.windLP.frequency, m.windLP);
+  if (storm.running) {
+    if (storm.thunderTimer) { clearTimeout(storm.thunderTimer); storm.thunderTimer = null; }
+    stormSchedule();
+  }
+}
+
+function startStorm() {
+  if (!stormActive()) return;
+  if (!storm) storm = buildStorm();
+  if (!storm) return;
+  if (storm.ctx.state === "suspended") storm.ctx.resume();
+
+  const mood = (gameState.phaseIndex >= 0)
+    ? phaseMood(PHASES[gameState.phaseIndex].key)
+    : "night";
+
+  storm.running = true;
+  applyStormMood(mood, 0.8);
+
+  const now = storm.ctx.currentTime;
+  storm.master.gain.cancelScheduledValues(now);
+  storm.master.gain.setValueAtTime(Math.max(0.0001, storm.master.gain.value), now);
+  storm.master.gain.linearRampToValueAtTime(STORM_FULL, now + 2.0);
+
+  if (!storm.thunderTimer) stormSchedule();
+}
+
+function stopStorm(fade) {
+  if (!storm) return;
+  const now = storm.ctx.currentTime;
+  const f = (typeof fade === "number") ? fade : 1.2;
+  storm.master.gain.cancelScheduledValues(now);
+  storm.master.gain.setValueAtTime(Math.max(0.0001, storm.master.gain.value), now);
+  storm.master.gain.linearRampToValueAtTime(0.0001, now + f);
+  storm.running = false;
+  if (storm.thunderTimer) { clearTimeout(storm.thunderTimer); storm.thunderTimer = null; }
+}
+
+// Abbassa il temporale mentre parla il narratore (ducking).
+function stormDuck(on) {
+  if (!storm || !storm.running) return;
+  const now = storm.ctx.currentTime;
+  const target = on ? 0.35 : STORM_FULL;
+  storm.master.gain.cancelScheduledValues(now);
+  storm.master.gain.setValueAtTime(Math.max(0.0001, storm.master.gain.value), now);
+  storm.master.gain.linearRampToValueAtTime(target, now + 0.35);
+}
+
+// Aggiorna il temporale a ogni cambio di fase.
+function updateStormForPhase(p) {
+  if (!storm || !storm.running) return;
+  applyStormMood(phaseMood(p.key));
+  if (p.key === "vote") {
+    // stoccata sulla votazione
+    stormThunder(1.0, 320);
+  }
 }
 
 // -----------------------------
@@ -381,8 +593,18 @@ btnStartGame.addEventListener("click", () => {
 // Abilita audio (necessario su mobile)
 btnAudioEnable.addEventListener("click", () => {
   audioUnlocked = true;
+  startStorm();
   speak("Audio abilitato. Possiamo iniziare.");
   playSfx("day");
+});
+
+// Toggle sottofondo temporale
+chkStormEnabled.addEventListener("change", () => {
+  if (chkStormEnabled.checked) {
+    if (audioUnlocked) startStorm();
+  } else {
+    stopStorm();
+  }
 });
 
 // Controlli fase
@@ -396,6 +618,7 @@ btnPhaseRepeat.addEventListener("click", () => repeatPhaseAudio());
 
 btnExitGame.addEventListener("click", () => {
   stopAllAudio();
+  stopStorm();
   showScreen("done");
 });
 

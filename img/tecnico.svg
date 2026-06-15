@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Tecnico">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="34%" r="78%">
+      <stop offset="0%" stop-color="#0f2a22"/>
+      <stop offset="100%" stop-color="#0b0f14"/>
+    </radialGradient>
+    <radialGradient id="gl" cx="50%" cy="42%" r="58%">
+      <stop offset="0%" stop-color="#34d399" stop-opacity=".40"/>
+      <stop offset="100%" stop-color="#34d399" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="cog" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#52e0ad"/>
+      <stop offset="1" stop-color="#1f8d68"/>
+    </linearGradient>
+  </defs>
+
+  <circle cx="100" cy="100" r="94" fill="url(#bg)"/>
+  <circle cx="100" cy="100" r="94" fill="url(#gl)"/>
+  <circle cx="100" cy="100" r="94" fill="none" stroke="#34d399" stroke-opacity=".55" stroke-width="2.5"/>
+
+  <!-- faro -->
+  <g stroke-linejoin="round">
+    <ellipse cx="100" cy="183" rx="26" ry="5" fill="#0e1420"/>
+    <polygon points="94,181 106,181 103,158 97,158" fill="#2a3242"/>
+    <rect x="95" y="153" width="10" height="5.5" fill="#222a38"/>
+    <circle cx="100" cy="156" r="2.8" fill="#9af5d3"/>
+  </g>
+
+  <!-- ingranaggio -->
+  <g fill="url(#cog)">
+    <g>
+      <rect x="93" y="50" width="14" height="20" rx="3"/>
+    </g>
+    <g transform="rotate(45 100 98)"><rect x="93" y="50" width="14" height="20" rx="3"/></g>
+    <g transform="rotate(90 100 98)"><rect x="93" y="50" width="14" height="20" rx="3"/></g>
+    <g transform="rotate(135 100 98)"><rect x="93" y="50" width="14" height="20" rx="3"/></g>
+    <g transform="rotate(180 100 98)"><rect x="93" y="50" width="14" height="20" rx="3"/></g>
+    <g transform="rotate(225 100 98)"><rect x="93" y="50" width="14" height="20" rx="3"/></g>
+    <g transform="rotate(270 100 98)"><rect x="93" y="50" width="14" height="20" rx="3"/></g>
+    <g transform="rotate(315 100 98)"><rect x="93" y="50" width="14" height="20" rx="3"/></g>
+    <circle cx="100" cy="98" r="32"/>
+  </g>
+  <circle cx="100" cy="98" r="14" fill="#0c1712"/>
+
+  <!-- saetta (blocca la notte) -->
+  <path d="M104,84 L92,101 L100,101 L96,116 L110,96 L102,96 Z" fill="#9af5d3"/>
+</svg>
